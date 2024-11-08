@@ -1,0 +1,60 @@
+#include <stdio.h>
+#include <pthread.h>
+
+#define NUM_READERS 2
+#define NUM_WRITERS 2
+
+pthread_mutex_t mutex;
+pthread_cond_t reader_cond, writer_cond;
+int read_count = 0, write_count = 0, shared_data = 0;
+
+void* reader(void* arg) {
+    pthread_mutex_lock(&mutex);          
+    while (write_count > 0)               
+        pthread_cond_wait(&reader_cond, &mutex);
+    read_count++;
+    pthread_mutex_unlock(&mutex);         
+
+    printf("Reader read data: %d\n", shared_data);
+
+    pthread_mutex_lock(&mutex);         
+    read_count--;
+    if (read_count == 0)                  
+        pthread_cond_signal(&writer_cond);
+    pthread_mutex_unlock(&mutex);
+    return NULL;
+}
+
+void* writer(void* arg) {
+    pthread_mutex_lock(&mutex);          
+    write_count++;
+    while (read_count > 0)               
+        pthread_cond_wait(&writer_cond, &mutex);
+
+    shared_data++;                        
+    printf("Writer updated data to: %d\n", shared_data);
+
+    write_count--;
+    pthread_cond_broadcast(&reader_cond); 
+    pthread_cond_signal(&writer_cond);    
+    pthread_mutex_unlock(&mutex);
+    return NULL;
+}
+
+int main() {
+    pthread_t readers[NUM_READERS], writers[NUM_WRITERS];
+    pthread_mutex_init(&mutex, NULL);
+    pthread_cond_init(&reader_cond, NULL);
+    pthread_cond_init(&writer_cond, NULL);
+
+    for (int i = 0; i < NUM_READERS; i++) pthread_create(&readers[i], NULL, reader, NULL);
+    for (int i = 0; i < NUM_WRITERS; i++) pthread_create(&writers[i], NULL, writer, NULL);
+
+    for (int i = 0; i < NUM_READERS; i++) pthread_join(readers[i], NULL);
+    for (int i = 0; i < NUM_WRITERS; i++) pthread_join(writers[i], NULL);
+
+    pthread_mutex_destroy(&mutex);
+    pthread_cond_destroy(&reader_cond);
+    pthread_cond_destroy(&writer_cond);
+    return 0;
+}
