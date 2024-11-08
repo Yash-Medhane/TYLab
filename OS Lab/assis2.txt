@@ -1,0 +1,67 @@
+echo "Welcome to my address book ..."
+read -p "Enter the name of address book : " bname
+
+if [! -e $bname]; then
+	touch $bname
+	echo "Address book is successfully created with name $bname"
+	echo -e "ID\t\tNAME\t\tMOBILE\t\tEMAIL" >> $bname
+else 
+	echo "Address book already exits with name $bname !!"
+fi
+
+while true; do
+	echo ""
+	echo "******Address book******"
+	echo "a.display address book"
+	echo "b.insert a record"
+	echo "c.delete a record"
+	echo "d.modify a record"
+	echo "e.exit"
+	read ch
+
+	case $ch in
+
+	a) cat $bname
+	   echo ""
+	   ;;
+	b) read -p "enter the id : " id
+           read -p "enter the name : " name
+	   read -p "enter the mobile : " mobile 
+	   read -p "enter the email : " email
+ 	   echo -e "$id\t\t$name\t\t$mobile\t\t$email" >> $bname
+	   ;;
+	c) read -p "enter id to delete record : " did
+		if grep -qw $did $bname; then
+		grep -vw $did $bname >> temp
+		mv temp $bname
+		
+		echo "the record is deleted"
+		else
+		echo "the record does not exits"
+		fi
+		;;
+	d)  read -p "enter id to modify record : " mid
+		if grep -qw $mid $bname; then
+		grep -vw $mid $bname >> temp
+		mv temp $bname
+		
+		read -p "enter the id : " id
+           	read -p "enter the name : " name
+	   	read -p "enter the mobile : " mobile 
+	   	read -p "enter the email : " email
+ 	   	echo -e "$id\t\t$name\t\t$mobile\t\t$email" >> $bname
+	   	echo "record has been modified"
+		else
+		echo "the record does not exits"
+		fi
+		;;
+	e)
+		echo "Thank you!!"
+		exit
+		;;
+	*) 
+		echo "Enter valid choice"
+	esac
+done
+
+	
