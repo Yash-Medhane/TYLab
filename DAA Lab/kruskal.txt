@@ -1,0 +1,65 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+void bubbleSort(vector<int>& start, vector<int>& destination, vector<int>& weight, int edges) {
+    for (int i = 0; i < edges - 1; i++) {
+        for (int j = 0; j < edges - i - 1; j++) {
+            if (weight[j] > weight[j + 1]) {
+                swap(weight[j], weight[j + 1]);
+                swap(start[j], start[j + 1]);
+                swap(destination[j], destination[j + 1]);
+            }
+        }
+    }
+}
+
+int findParent(int i, vector<int>& parent) {
+    if (parent[i] == -1) {
+        return i;
+    }
+    return findParent(parent[i], parent);
+}
+
+int main() {
+    int n; // Number of nodes
+    int edges; // Number of edges
+
+    cout << "Enter the number of nodes: ";
+    cin >> n;
+    cout << "Enter the number of edges: ";
+    cin >> edges;
+
+    vector<int> parent(n, -1);
+    vector<int> start(edges), destination(edges), weight(edges);
+
+    cout << "Enter the edges (start, destination, weight):\n";
+    for (int i = 0; i < edges; i++) {
+        cout << "Edge " << i + 1 << ": ";
+        cin >> start[i] >> destination[i] >> weight[i];
+    }
+
+    // Sort edges by weight
+    bubbleSort(start, destination, weight, edges);
+
+    int minCost = 0;
+    int edgesInMST = 0;
+
+    cout << "\nEdges in the Minimum Spanning Tree (MST):\n";
+    cout << "Start\tDestination\tWeight\n";
+    for (int i = 0; i < edges && edgesInMST < n - 1; i++) {
+        int u = findParent(start[i], parent);
+        int v = findParent(destination[i], parent);
+
+        if (u != v) { // No cycle
+            cout << start[i] << "\t" << destination[i] << "\t\t" << weight[i] << endl;
+            minCost += weight[i];
+            parent[u] = v; // Union operation
+            edgesInMST++;
+        }
+    }
+
+    cout << "Minimum Cost: " << minCost << endl;
+    return 0;
+}

@@ -65,7 +65,7 @@ void forkeg()
      		printf("\n");
        		for(i=0;i<n;i++)
     			printf("%d,",arr[i]);
-    		printf("\b");
+    		printf("\n");
      		printf("\nparent process id=%d\n",getppid());
      		system("ps -x");
        }

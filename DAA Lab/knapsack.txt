@@ -1,0 +1,58 @@
+#include <iostream>
+#include <algorithm>
+#include <iomanip>
+using namespace std;
+
+struct Item {
+    int value;
+    int weight;
+};
+comp(Item a,Item b){
+
+ double r1 = (double)a.value/(double)a.weight;
+ double r2 = (double)b.value/(double)b.weight;
+
+ return r1>r2;
+
+}
+
+double fractional(Item arr[],int w,int n){
+
+    sort(arr,arr+n,comp);
+
+    int currW = 0 ;
+    double profit = 0.0;
+
+    for(int i=0;i<n;i++){
+        if(currW+arr[i].weight <= w){
+            currW +=arr[i].weight;
+            profit += arr[i].value;
+            if(currW == w) break;
+        }
+        else{
+            profit += ((double)arr[i].value/(double)arr[i].weight)*(w-currW);
+            break;
+        }
+    }
+    return profit;
+}
+
+
+int main(){
+
+    int n,weight;
+    cout<<"Enter the number of elements : ";
+    cin>>n;
+    cout<<"Enter the weight of sack : ";
+    cin>>weight;
+
+    Item arr[n];
+
+    for(int i=0;i<n;i++){
+        cout<<"Enter the weight & value of item "<<i+1<<" : ";
+        cin>>arr[i].weight>>arr[i].value;
+    }
+
+   cout<<"Maximum is : "<<setprecision(2)<<fixed<<fractional(arr,weight,n);
+return 0;
+}

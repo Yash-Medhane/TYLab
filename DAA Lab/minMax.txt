@@ -1,0 +1,46 @@
+#include <iostream>
+using namespace std;
+
+pair<int,int> minMax(int arr[],int l,int r){
+
+    pair<int,int>ans;
+
+    if(l==r){
+        ans.first = arr[l];
+        ans.second = arr[l];
+    }
+    else if(l+1==r){
+        if(arr[l]>arr[r]){
+           ans.first = arr[l];
+           ans.second = arr[r];
+        }
+        else{
+           ans.first = arr[r];
+           ans.second = arr[l];
+        }
+    }
+     else{
+        pair<int,int>ans1;
+        pair<int,int>ans2;
+         int mid = l + (r-l)/2;
+         ans1 = minMax(arr,l,mid);
+         ans2 = minMax(arr,mid+1,r);
+         ans.first = ans1.first > ans2.first ? ans1.first : ans2.first;
+         ans.second = ans1.second < ans2.second ? ans1.second : ans2.second;
+        }
+
+        return ans;
+
+}
+
+int main(){
+
+    int n = 5;
+    int arr[n] = {3,5,79,4,12};
+    pair<int,int> result = minMax(arr,0,n-1);
+
+    cout<<"max : "<<result.first<<endl;
+    cout<<"min : "<<result.second<<endl;
+
+    return 0;
+}
