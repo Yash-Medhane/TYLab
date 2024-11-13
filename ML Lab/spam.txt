@@ -1,0 +1,119 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[13]:
+
+
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import GridSearchCV
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import classification_report
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+import re
+
+
+# In[14]:
+
+
+data = pd.read_excel('csv/spam.xlsx', header=None)
+data.head()
+
+
+# In[15]:
+
+
+data[['label','message']] = data[0].str.split('\t', expand=True)
+data = data.drop(columns=[0])
+data.head()
+
+
+# In[17]:
+
+
+le = LabelEncoder()
+data['label'] = le.fit_transform(data['label'])
+data['msg_len'] = data['message'].apply(len) 
+data['w_cnt'] = data['message'].apply(lambda x: len(x.split()))
+
+def clean_text(text):
+    text = re.sub(r'[^a-zA-Z]','',text)
+    return text.lower()
+
+data['message'] = data['message'].apply(clean_text)
+
+
+# In[20]:
+
+
+x = data[['msg_len','w_cnt','message']]
+y = data['label']
+x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=42)
+
+
+# In[26]:
+
+
+vectorizer = CountVectorizer()
+x_trv = vectorizer.fit_transform(x_train['message'])
+x_tev = vectorizer.transform(x_test['message'])
+nb_model = MultinomialNB()
+nb_model.fit(x_trv,y_train)
+
+y_pred_nb = nb_model.predict(x_tev)
+print("naive bayes model performance : ")
+print(classification_report(y_test,y_pred_nb))
+
+
+# In[27]:
+
+
+lr_model = LogisticRegression(max_iter = 1000)
+lr_model.fit(x_trv,y_train)
+y_pred_lr = lr_model.predict(x_tev)
+print("Logistic Regression Model Performance : ")
+print(classification_report(y_test,y_pred_lr))
+
+
+# In[28]:
+
+
+nb_cv_scores = cross_val_score(nb_model, vectorizer.transform(x['message']),y,cv=5)
+print("Naive Bayes Cross-Validation Scores:", nb_cv_scores)
+print("Mean Cross-Validation Score (Naive Bayes):", nb_cv_scores.mean())
+
+lr_cv_scores = cross_val_score(lr_model,vectorizer.transform(x['message']),y,cv=5)
+print("Logistic Regression Cross-Validation Scores:", lr_cv_scores)
+print("Mean Cross-Validation Score (Logistic Regression):", lr_cv_scores.mean())
+
+
+# In[31]:
+
+
+param_grid = {
+    'C': [0.01,0.1,1,10,100],
+    'penalty': ['l1','l2']
+}
+grid_search = GridSearchCV(LogisticRegression(solver='liblinear'),param_grid,cv=5)
+grid_search.fit(x_trv,y_train)
+
+print("Best Hyperparameters for Logistic Regression : ",grid_search.best_params_)
+
+
+# In[32]:
+
+
+best_lr_model = grid_search.best_estimator_
+y_pred_best_lr = best_lr_model.predict(x_tev)
+print("Tuned Logistic Regression Model Performance : ")
+print(classification_report(y_test,y_pred_best_lr))
+
+
+# In[ ]:
+
+
+
+

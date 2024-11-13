@@ -1,0 +1,96 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
+import pandas as pd
+
+
+# In[5]:
+
+
+data = pd.read_csv('csv/Heart.csv')
+
+
+# In[13]:
+
+
+data.head()
+data.shape[0]
+
+
+# In[10]:
+
+
+data.duplicated().sum()
+
+
+# In[14]:
+
+
+data_cleaned = data.drop_duplicates()
+data_cleaned.shape[0]
+
+
+# In[16]:
+
+
+missing_values = data_cleaned.isnull().sum()
+missing_values
+
+
+# In[18]:
+
+
+data_cleaned.to_csv('heart_cleaned.csv',index=False)
+
+
+# In[19]:
+
+
+for column in data.columns:
+    if pd.api.types.is_numeric_dtype(data[column]):
+        if data[column].isnull().sum()>0:
+            median_value = data[column].median()
+            data[column].fillna(median_value,inplace=True)
+    else:
+        print(f"skipping no numeric column : {column}")
+
+
+# In[20]:
+
+
+missing_data_after = data.isnull().sum()
+missing_data_after
+
+
+# In[28]:
+
+
+from sklearn.preprocessing import StandardScaler
+numerical_features = data.select_dtypes(include=['int64','float64']).columns
+scaler = StandardScaler()
+
+
+# In[29]:
+
+
+data[numerical_features] = scaler.fit_transform(data[numerical_features])
+data.head()
+
+
+# In[32]:
+
+
+from sklearn.model_selection import train_test_split
+train_data,test_data = train_test_split(data,test_size=0.30,random_state=42)
+print("Training data : ",train_data.shape)
+print("Testing data : ",test_data.shape)
+
+
+# In[ ]:
+
+
+
+

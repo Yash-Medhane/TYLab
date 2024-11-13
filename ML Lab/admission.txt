@@ -1,0 +1,98 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[29]:
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+# In[32]:
+
+
+df = pd.read_csv('csv/Admission_Predict.csv')
+df.head()
+
+
+# In[35]:
+
+
+df.columns
+df.shape
+df.head
+
+
+# In[36]:
+
+
+df.isnull().sum()
+
+
+# In[37]:
+
+
+df.dtypes
+
+
+# In[40]:
+
+
+from sklearn.preprocessing import Binarizer
+bi = Binarizer(threshold = 0.9)
+df['Chance of Admit '] = bi.fit_transform(df[['Chance of Admit ']])
+df
+
+
+# In[43]:
+
+
+x = df.drop('Chance of Admit ', axis=1)
+y = df['Chance of Admit ']
+y.astype('int')
+
+
+# In[44]:
+
+
+sns.countplot(x=y)
+
+
+# In[45]:
+
+
+from sklearn.model_selection import train_test_split
+x_train,x_test,y_train,y_test = train_test_split(x,y, random_state = 0)
+from sklearn.tree import DecisionTreeClassifier
+
+
+# In[46]:
+
+
+classifier = DecisionTreeClassifier()
+classifier.fit(x_train,y_train)
+DecisionTreeClassifier()
+
+
+# In[48]:
+
+
+y_pred = classifier.predict(x_test)
+from sklearn.metrics import ConfusionMatrixDisplay
+from sklearn.metrics import accuracy_score
+ConfusionMatrixDisplay.from_predictions(y_pred,y_test)
+
+
+# In[49]:
+
+
+from sklearn.metrics import classification_report
+print(classification_report(y_pred,y_test))
+
+
+# In[ ]:
+
+
+
+
