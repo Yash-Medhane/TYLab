@@ -1,94 +1,65 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[29]:
+# In[1]:
 
 
-import pandas as pd
+import pandas as pd 
 import matplotlib.pyplot as plt
-import seaborn as sns
-
-
-# In[32]:
-
-
-df = pd.read_csv('csv/Admission_Predict.csv')
-df.head()
-
-
-# In[35]:
-
-
-df.columns
-df.shape
-df.head
-
-
-# In[36]:
-
-
-df.isnull().sum()
-
-
-# In[37]:
-
-
-df.dtypes
-
-
-# In[40]:
-
-
-from sklearn.preprocessing import Binarizer
-bi = Binarizer(threshold = 0.9)
-df['Chance of Admit '] = bi.fit_transform(df[['Chance of Admit ']])
-df
-
-
-# In[43]:
-
-
-x = df.drop('Chance of Admit ', axis=1)
-y = df['Chance of Admit ']
-y.astype('int')
-
-
-# In[44]:
-
-
-sns.countplot(x=y)
-
-
-# In[45]:
-
-
 from sklearn.model_selection import train_test_split
-x_train,x_test,y_train,y_test = train_test_split(x,y, random_state = 0)
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error,mean_absolute_error,r2_score
 
 
-# In[46]:
+# In[2]:
 
 
-classifier = DecisionTreeClassifier()
-classifier.fit(x_train,y_train)
-DecisionTreeClassifier()
+data = pd.read_csv('csv/temp.csv')
 
 
-# In[48]:
+# In[3]:
 
 
-y_pred = classifier.predict(x_test)
-from sklearn.metrics import ConfusionMatrixDisplay
-from sklearn.metrics import accuracy_score
-ConfusionMatrixDisplay.from_predictions(y_pred,y_test)
+data
 
 
-# In[49]:
+# In[4]:
 
 
-from sklearn.metrics import classification_report
-print(classification_report(y_pred,y_test))
+x =  data[['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC']]
+y = data['ANNUAL']
+
+
+# In[10]:
+
+
+X_train,X_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=42)
+
+model = LinearRegression()
+model.fit(X_train,y_train)
+
+y_pred = model.predict(X_test)
+
+mse = mean_squared_error(y_test,y_pred)
+mae = mean_absolute_error(y_test,y_pred)
+r2 = r2_score(y_test,y_pred)
+
+print(f'Mean Squared Error (MSE):{mse:.2f}')
+print(f'Mean Absolute Error (MAE):{mae:.2f}')
+print(f'R-Squared (R2):{r2:.2f}')
+
+
+# In[12]:
+
+
+plt.figure(figsize = (10,6))
+plt.scatter(y_test,y_pred, color='green',alpha=0.5)
+plt.plot([y.min(),y.max()],[y.min(),y.max()],'--r',linewidth=3)
+plt.title('Actual vs Predicted Annual Temperatures')
+plt.xlabel('Actual Annual Temperature (0C)')
+plt.ylabel('Predicted Annual Temperature (0c)')
+plt.grid()
+plt.show()
 
 
 # In[ ]:
